@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.shuangyulin.mapper.OrderItemMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加订单条目记录 -->
+	<insert id="addOrderItem" parameterType="orderItem">
+		insert into t_orderItem(orderObj,productObj,price,orderNumer) values 
+		(#{orderObj.orderNo},#{productObj.productId},#{price},#{orderNumer})
+	</insert>
+
+	<!-- 按照查询条件分页查询订单条目记录 -->
+	<select id="queryOrderItem" resultMap="orderItemMap" >
+		select t_orderItem.* from t_orderItem,t_orderInfo,t_product ${where} and t_orderItem.orderObj = t_orderInfo.orderNo and t_orderItem.productObj = t_product.productId limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="orderItemMap" type="orderItem">
+        <id property="itemId" column="itemId" />
+        <association property="orderObj" column="orderObj" select="com.shuangyulin.mapper.OrderInfoMapper.getOrderInfo" />
+        <association property="productObj" column="productObj" select="com.shuangyulin.mapper.ProductMapper.getProduct" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有订单条目记录 -->
+	<select id="queryOrderItemList" resultMap="orderItemMap" >
+		select t_orderItem.* from t_orderItem,t_orderInfo,t_product ${where} and t_orderItem.orderObj = t_orderInfo.orderNo and t_orderItem.productObj = t_product.productId
+	</select>
+
+    <!-- 按照查询条件的订单条目记录数 -->
+	<select id="queryOrderItemCount" resultType="int">
+		select count(*) from t_orderItem,t_orderInfo,t_product ${where} and t_orderItem.orderObj = t_orderInfo.orderNo and t_orderItem.productObj = t_product.productId
+	</select>
+
+	<!-- 根据主键查询某个订单条目记录 -->
+	<select id="getOrderItem" parameterType="int" resultMap="orderItemMap">
+		select * from t_orderItem where t_orderItem.itemId = #{itemId}
+	</select>
+
+	<!-- 更新订单条目记录 -->
+	<update id="updateOrderItem" parameterType="orderItem">
+		update t_orderItem set orderObj=#{orderObj.orderNo},productObj=#{productObj.productId},price=#{price},orderNumer=#{orderNumer} where itemId = #{itemId}
+	</update>
+
+	<!-- 删除订单条目记录 -->
+	<delete id="deleteOrderItem" parameterType="int">
+		delete from t_orderItem where itemId=#{itemId}
+	</delete>
+
+</mapper>

@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.shuangyulin.mapper.ShopCartMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加购物车记录 -->
+	<insert id="addShopCart" parameterType="shopCart">
+		insert into t_shopCart(productObj,userObj,price,buyNum) values 
+		(#{productObj.productId},#{userObj.user_name},#{price},#{buyNum})
+	</insert>
+
+	<!-- 按照查询条件分页查询购物车记录 -->
+	<select id="queryShopCart" resultMap="shopCartMap" >
+		select t_shopCart.* from t_shopCart,t_product,t_userInfo ${where} and t_shopCart.productObj = t_product.productId and t_shopCart.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="shopCartMap" type="shopCart">
+        <id property="cartId" column="cartId" />
+        <association property="productObj" column="productObj" select="com.shuangyulin.mapper.ProductMapper.getProduct" />
+        <association property="userObj" column="userObj" select="com.shuangyulin.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有购物车记录 -->
+	<select id="queryShopCartList" resultMap="shopCartMap" >
+		select t_shopCart.* from t_shopCart,t_product,t_userInfo ${where} and t_shopCart.productObj = t_product.productId and t_shopCart.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的购物车记录数 -->
+	<select id="queryShopCartCount" resultType="int">
+		select count(*) from t_shopCart,t_product,t_userInfo ${where} and t_shopCart.productObj = t_product.productId and t_shopCart.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个购物车记录 -->
+	<select id="getShopCart" parameterType="int" resultMap="shopCartMap">
+		select * from t_shopCart where t_shopCart.cartId = #{cartId}
+	</select>
+
+	<!-- 更新购物车记录 -->
+	<update id="updateShopCart" parameterType="shopCart">
+		update t_shopCart set productObj=#{productObj.productId},userObj=#{userObj.user_name},price=#{price},buyNum=#{buyNum} where cartId = #{cartId}
+	</update>
+
+	<!-- 删除购物车记录 -->
+	<delete id="deleteShopCart" parameterType="int">
+		delete from t_shopCart where cartId=#{cartId}
+	</delete>
+
+</mapper>
